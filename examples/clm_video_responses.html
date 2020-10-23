@@ -26,6 +26,7 @@
 			}
 
 			#videoel {
+				z-index: -1000;
 				-o-transform : scaleX(-1);
 				-webkit-transform : scaleX(-1);
 				transform : scaleX(-1);
@@ -71,8 +72,8 @@
 			// getUserMedia only works over https in Chrome 47+, so we redirect to https. Also notify user if running from file.
 			if (window.location.protocol == "file:") {
 				alert("You seem to be running this example directly from a file. Note that these examples only work when served from a server or localhost due to canvas cross-domain restrictions.");
-			} else if (window.location.hostname !== "localhost" && window.location.protocol !== "https:"){
-				window.location.protocol = "https";
+			} else if (window.location.hostname !== "localhost" && window.location.protocol !== "http:"){
+window.location.protocol = "http";
 			}
 		</script>
 		<script type="text/javascript">
@@ -89,7 +90,13 @@
 
 		</script>
 	</head>
+		
+		 <!-- import pixi -->
+		 <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.3.3/pixi.min.js"></script>
+
+	
 	<body>
+	
 		<script src="./js/libs/utils.js"></script>
 		<script src="../build/clmtrackr.js"></script>
 		<script src="./js/libs/Stats.js"></script>
@@ -121,13 +128,14 @@
 				var vid = document.getElementById('videoel');
 				var vid_width = vid.width;
 				var vid_height = vid.height;
+				var container = document.getElementById('container')
 				var overlay = document.getElementById('overlay');
-				var overlayCC = overlay.getContext('2d');
-
+			var overlayCC = overlay.getContext('2d');
+			
 				var ctrack = new clm.tracker({useWebGL : true});
 				ctrack.init();
 				var trackingStarted = false;
-
+			
 				stats = new Stats();
 				stats.domElement.style.position = 'absolute';
 				stats.domElement.style.top = '0px';
@@ -217,13 +225,62 @@
 					drawLoop();
 				}
 
+				var renderer = PIXI.autoDetectRenderer({ width: 400, height: 300, transparent: true});
+				var pixiView = renderer.view
+				console.log("pixiView",pixiView)
+				container.appendChild(pixiView);
+						// Create the main stage for your display objects
+						
+			//change z property
+			var stage = new PIXI.Container();
+
+
 				function drawLoop() {
 					requestAnimFrame(drawLoop);
-					overlayCC.clearRect(0, 0, vid_width, vid_height);
+					//overlayCC.clearRect(0, 0, vid_width, vid_height);
 					//psrElement.innerHTML = "score :" + ctrack.getScore().toFixed(4);
 					if (ctrack.getCurrentPosition()) {
+						// call draw
 						ctrack.draw(overlay);
-					}
+					
+				
+
+						var positions = ctrack.getCurrentPosition()
+						const smile = positions.slice(44,56)
+					//	console.log(smile)
+						const strokes = smile.reduce((acc,val) => {
+							value = val[0] + "," + val[1] + " "
+						return acc += value;
+						}, "")
+
+						const points = smile.reduce((acc,val) => {
+							acc.push(val[0])
+							acc.push(val[1])
+							return acc;
+						},[] )
+						//console.log("points",points)
+						
+							var graphics = new PIXI.Graphics();
+							// graphics.beginFill(0xe74c3c);
+							// graphics.drawPolygon(points);
+							// graphics.endFill();
+							// Add the graphics to the stage
+							stage.addChild(graphics);
+
+							// Start animating
+							animate();
+							function animate() {
+									//Render the stage
+									graphics.clear()
+									graphics.beginFill(0xe74c3c);
+							graphics.drawPolygon(points);
+							graphics.endFill();
+									renderer.render(stage);
+									requestAnimationFrame(animate);
+							}
+
+
+						}
 				}
 
 				// update stats on every iteration
@@ -252,6 +309,8 @@
 				document.getElementById('selectmode').addEventListener('change', switchMode, false);
 
 			</script>
+
+
 		</div>
 	</body>
 </html>
