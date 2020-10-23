@@ -36,15 +36,21 @@
 
 			#container {
 				position : relative;
-				width : 370px;
+
 				/*margin : 0px auto;*/
+			}
+			.pixiView {
+				position: relative;
+				top: -304px;
+				width: 400px;
+				height:300px;
 			}
 
 			#content {
 				margin-top : 70px;
 				margin-left : 100px;
 				margin-right : 100px;
-				max-width: 950px;
+				max-width: 600px;
 			}
 
 			h2 {
@@ -225,62 +231,47 @@ window.location.protocol = "http";
 					drawLoop();
 				}
 
-				var renderer = PIXI.autoDetectRenderer({ width: 400, height: 300, transparent: true});
-				var pixiView = renderer.view
-				console.log("pixiView",pixiView)
-				container.appendChild(pixiView);
-						// Create the main stage for your display objects
-						
-			//change z property
-			var stage = new PIXI.Container();
+				//------------- PIXI ------------\\
 
+				var renderer = PIXI.autoDetectRenderer({ width: 400, height: 300, transparent: true});
+				var pixiView = renderer.view;
+				pixiView.className = "pixiView"
+				var stage = new PIXI.Container();
+				container.appendChild(pixiView);
 
 				function drawLoop() {
 					requestAnimFrame(drawLoop);
-					//overlayCC.clearRect(0, 0, vid_width, vid_height);
-					//psrElement.innerHTML = "score :" + ctrack.getScore().toFixed(4);
 					if (ctrack.getCurrentPosition()) {
-						// call draw
-						ctrack.draw(overlay);
 					
-				
-
+					// get face anchor points as array
 						var positions = ctrack.getCurrentPosition()
 						const smile = positions.slice(44,56)
-					//	console.log(smile)
-						const strokes = smile.reduce((acc,val) => {
-							value = val[0] + "," + val[1] + " "
-						return acc += value;
-						}, "")
-
+					
 						const points = smile.reduce((acc,val) => {
-							acc.push(val[0])
+							acc.push(Math.abs(400- val[0]))
 							acc.push(val[1])
 							return acc;
 						},[] )
-						//console.log("points",points)
+						console.log("points",points)
 						
-							var graphics = new PIXI.Graphics();
-							// graphics.beginFill(0xe74c3c);
-							// graphics.drawPolygon(points);
-							// graphics.endFill();
-							// Add the graphics to the stage
-							stage.addChild(graphics);
+						var graphics = new PIXI.Graphics();
+						
+							
+						stage.addChild(graphics);
 
-							// Start animating
-							animate();
-							function animate() {
-									//Render the stage
-									graphics.clear()
-									graphics.beginFill(0xe74c3c);
-							graphics.drawPolygon(points);
-							graphics.endFill();
-									renderer.render(stage);
-									requestAnimationFrame(animate);
+						// Start animating
+						animate();
+						function animate() {				
+								graphics.beginFill(0xe74c3c);
+								graphics.drawPolygon(points);
+								graphics.endFill();	
+								renderer.render(stage);
+								graphics.clear()
 							}
 
-
+						
 						}
+				
 				}
 
 				// update stats on every iteration
